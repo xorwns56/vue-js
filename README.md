@@ -12,3 +12,40 @@
     * **`vue create frontend`** 해당 경로에서 frontend 프로젝트 생성
     * cd frontend를 통해 frontend 프로젝트 내부로 이동
     * **`vue add router`** 해당 경로에서 라우터 추가
+## 라우터 설정
+   * 라우터 설정을 통해 views에 있는 vue들의 경로를 매핑해주어야 한다.
+   <table>
+   <tr><th>src > router > index.js</th></tr>
+   <tr><td>
+      
+   ```js
+   import { createRouter, createWebHistory } from 'vue-router'
+   import HomeView from '../views/HomeView.vue'
+   
+   const routes = [
+     {
+       path: '/',
+       name: 'home',
+       component: HomeView
+     },
+     {
+       path: '/about',
+       name: 'about',
+       // route level code-splitting
+       // this generates a separate chunk (about.[hash].js) for this route
+       // which is lazy-loaded when the route is visited.
+       component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+     }
+   ]
+   
+   const router = createRouter({
+     history: createWebHistory(process.env.BASE_URL),
+     routes
+   })
+   
+   export default router
+   ```
+   </td></tr>
+   </table>
+   
+## Vue 문법
