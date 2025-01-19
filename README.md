@@ -20,32 +20,47 @@
       
    ```js
    import { createRouter, createWebHistory } from 'vue-router'
-   import HomeView from '../views/HomeView.vue'
    
    const routes = [
-     {
-       path: '/',
-       name: 'home',
-       component: HomeView
-     },
-     {
-       path: '/about',
-       name: 'about',
-       // route level code-splitting
-       // this generates a separate chunk (about.[hash].js) for this route
-       // which is lazy-loaded when the route is visited.
-       component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-     }
+     { path: '/', name: 'home', component: () => import(/* webpackChunkName: "home" */ '../views/HomeView.vue') },
+     { path: '/about', name: 'about', component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue') }
    ]
    
    const router = createRouter({
      history: createWebHistory(process.env.BASE_URL),
      routes
    })
-   
+
    export default router
    ```
    </td></tr>
    </table>
    
 ## Vue 문법
+   * 라우터 설정을 통해 views에 있는 vue들의 경로를 매핑해주어야 한다.
+   <table>
+   <tr><th>HomeView.vue</th></tr>
+   <tr><td>
+      
+   ```vue
+   <template>
+  <div class="home">
+    <img alt="Vue logo" src="../assets/logo.png">
+    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  </div>
+   </template>
+   
+   <script>
+   // @ is an alias to /src
+   import HelloWorld from '@/components/HelloWorld.vue'
+   
+   export default {
+     name: 'HomeView',
+     components: {
+       HelloWorld
+     }
+   }
+   </script>
+   ```
+   </td></tr>
+   </table>
