@@ -51,8 +51,8 @@
       
       const app = createApp(App);
       
-      const developmentPath = 'http://localhost:3000/api'; //개발 시 경로
-      const productionPath = 'http://localhost:8080'; //빌드 후 경로
+      const developmentPath = 'http://localhost:3000/api'; //개발용 경로
+      const productionPath = 'http://localhost:8080'; //프로덕션 빌드 경로
       
       const axiosInstance = axios.create({
         baseURL: process.env.NODE_ENV === 'development' ? developmentPath : productionPath,
