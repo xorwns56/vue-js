@@ -39,19 +39,187 @@
     * cd project를 통해 project라는 이름의 프로젝트 내부로 이동
     * **`npm install axios`** 해당 경로에서 axios 추가
     * main.js에서 axios import 후 instance를 전역으로 추가
+      <table>
+      <tr><th>src > main.js</th></tr>
+      <tr><td>
+         
+      ```js
+      import { createApp } from 'vue'
+      import App from './App.vue'
+      import router from './router'
+      import axios from 'axios';
+      
+      const app = createApp(App);
+      
+      const developmentPath = 'http://localhost:3000/api'; //개발 시 경로
+      const productionPath = 'http://localhost:8080'; //빌드 후 경로
+      
+      const axiosInstance = axios.create({
+        baseURL: process.env.NODE_ENV === 'development' ? developmentPath : productionPath,
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      app.config.globalProperties.$axios = axiosInstance;
+      
+      app.use(router).mount('#app')
+      ```
+      </td></tr>
+      </table>
+6. **vue.config.js 수정**
+    * 개발환경에서의 CORS 문제를 해결하기 위해 프록시 설정
+    * 프론트엔드 개발 서버의 포트를 3000으로 고정
+      <table>
+      <tr><th>vue.config.js</th></tr>
+      <tr><td>
+         
+      ```js
+      const { defineConfig } = require('@vue/cli-service')
+      module.exports = defineConfig({
+        transpileDependencies: true,
+        devServer: {
+      	port: 3000,
+      	proxy: {
+      		"/api": {
+      			target: "http://localhost:8080",
+      			changeOrigin: true,
+      			pathRewrite: {
+      				"^/api": ""
+      			}
+      		}
+      	}
+        }
+      })
+      ```
+      </td></tr>
+      </table>
 ## Vue 작성
-   라우터 추가할 때 자동추가된 AboutView.vue를 수정해서 테스트해보도록 하겠습니다.
+   라우터 추가할 때 자동추가된 AboutView.vue를 수정해서 테스트
    <table>
    <tr><th>src > views > AboutView.vue</th></tr>
    <tr><td>
       
    ```vue
+   <style>
+      .row{
+      width:80%;
+      margin:0 auto;
+      display:flex;
+      flex-direction:row;
+      flex-wrap:nowrap;
+      }
+      .row div{
+      border:1px solid black;
+      }
+      .title{
+      flex:3;
+      }
+      .author{
+      flex:1;
+      }
+      .created-at{
+      flex:1;
+      }
+      .updated-at{
+      flex:1;
+      }
+      .form{
+      margin:50px auto;
+      width:300px;
+      height:150px;
+      padding:5px;
+      display:flex;
+      flex-direction:column;
+      border:1px solid black;
+      }
+      .form textarea{
+      flex:1;
+      }
+      .pagination{
+      display:inline-block;
+      }
+      .pagination div{
+      float:left;
+      padding:8px 16px;
+      }
+      .pagination div:hover{
+      cursor: pointer;
+      background-color:#ccc;
+      }
+   </style>
    <template>
-   <div class="about">
-    <h1>This is an about page</h1>
-   </div>
+      <div class="row">
+      <div class="title">제목</div>
+      <div class="author">작성자</div>
+      <div class="created-at">작성일</div>
+      <div class="updated-at">수정일</div>
+      </div>
+   
+      <div class="row" v-for="post in posts" v-bind:key="post.id">
+      <div class="title">{{post.title}}</div>
+      <div class="author">{{post.author}}</div>
+      <div class="created-at">{{post.createdAt}}</div>
+      <div class="updated-at">{{post.updatedAt}}</div>
+      </div>
+   
+      <div class="pagination">
+      <div v-if="paginationInfo.firstPageNoOnPageList != 1" v-on:click="getPosts(paginationInfo.firstPageNoOnPageList - 1)">&#x2770;</div>
+      <div v-for="page in paginationArray" v-bind:key="page" v-on:click="page !== paginationInfo.currentPageNo && getPosts(page)" v-bind:style="page === paginationInfo.currentPageNo ? { pointerEvents:'none', backgroundColor:'#ccc' } : {}">
+      	{{page}}
+      </div>
+      <div v-if="paginationInfo.lastPageNoOnPageList != paginationInfo.totalPageCount" v-on:click="getPosts(paginationInfo.lastPageNoOnPageList + 1)">&#x2771;</div>
+      </div>
+   
+      <div class="form">
+      <input type="text" v-model="formData.title" placeholder="제목"/>
+      <input type="text" v-model="formData.author" placeholder="작성자"/>
+      <textarea v-model="formData.content" placeholder="내용"></textarea>
+      <input type="button" v-on:click="addPost" value="데이터 추가"/>
+      </div>
    </template>
+   
    <script>
+   export default{
+      data(){
+      	return {
+      		posts : [],
+      		formData : {},
+      		paginationInfo : {}
+      	}
+      },
+      computed:{
+      	paginationArray(){
+      		return Array.from({length: this.paginationInfo.lastPageNoOnPageList - this.paginationInfo.firstPageNoOnPageList + 1}, (v, i) => i + this.paginationInfo.firstPageNoOnPageList);
+      	}
+      },
+      methods:{
+         async getPosts(pageNo){
+         	try{
+         		const response = await this.$axios.get("/post", {
+         			params :  {
+         				pageNo : pageNo
+         			}
+         		});
+         		this.posts = response.data.posts;
+         		this.paginationInfo = response.data.paginationInfo;
+         	}catch(error){
+         		console.log(error);
+         	}
+         },
+         async addPost(){
+         	try{
+         		await this.$axios.post("/post", this.formData);
+         		await this.getPosts(this.paginationInfo.currentPageNo);
+         	}catch(error){
+         		console.log(error);
+         	}
+         }
+      },
+      created(){
+         this.getPosts(1);
+   }
+   }
    </script>
 
    ```
