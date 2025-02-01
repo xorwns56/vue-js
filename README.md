@@ -95,7 +95,7 @@
       </td></tr>
       </table>
 ## Vue 작성
-   라우터 추가할 때 자동추가된 AboutView.vue를 수정해서 테스트
+   라우터를 추가할 때 자동추가된 AboutView.vue를 수정해서 작성
    <table>
    <tr><th>src > views > AboutView.vue</th></tr>
    <tr><td>
@@ -225,3 +225,13 @@
    ```
    </td></tr>
    </table>
+
+## Vue 서버 실행 및 프로덕션 빌드
+1. **개발 서버 실행**
+    * cd를 통해 프로젝트 경로로 이동
+    * **`npm run serve`**
+    * http://localhost:3000 에서 확인 가능
+2. **프로덕션 빌드**
+    * cd를 통해 프로젝트 경로로 이동
+    * **`npm run build`**
+    * 빌드 결과물은 dist에 생성되며, 백엔드 프로젝트의 static 폴더에 넣어서 빌드
